@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AgroGestión</title>
+  <link rel="stylesheet" href="Estilo.css" />
+  <link rel="icon" href="2.png" />
+
+  <!-- Chart.js para gráficos -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- jsPDF para exportar gráficos a PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <!-- EmailJS para envío de correos -->
+  <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+  <script>
+    (function () {
+      emailjs.init("lXAwarU_FUb62nWoB");
+    })();
+  </script>
+</head>
+<body>
+
+  <div id="alerta" class="alerta oculto"></div>
+
+  <header>
+    <div class="logo-titulo">
+      <img src="2.png" alt="Logo AgroGestión" />
+      <div>
+        <h1>AgroGestión</h1>
+        <p>Bienvenido al sistema inteligente de administración de cultivos</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- Pantalla de inicio de sesión -->
+  <section id="login" class="panel principal activo">
+    <h2>Iniciar Sesión</h2>
+    <form id="formLogin">
+      <div>
+        <label for="email">Correo electrónico:</label>
+        <input type="email" id="email" name="email" required placeholder="usuario@correo.com" />
+      </div>
+      <div>
+        <label for="password">Contraseña:</label>
+        <input type="password" id="password" name="password" required placeholder="********" />
+      </div>
+      <button type="submit">Ingresar</button>
+    </form>
+  </section>
+
+  <!-- Menú lateral -->
+  <nav id="menuLateral" class="oculto">
+    <ul>
+      <li><a href="#" onclick="mostrarPanel('dashboard', event)" class="activo">Panel Principal</a></li>
+      <li><a href="#" onclick="mostrarPanel('cultivos', event)">Registro de Cultivos</a></li>
+      <li><a href="#" onclick="mostrarPanel('planificacion', event)">Planificación</a></li>
+      <li><a href="#" onclick="mostrarPanel('reportes', event)">Reportes</a></li>
+      <li><a href="#" onclick="mostrarPanel('insumos', event)">Gestión de Insumos</a></li>
+      <li><a href="#" onclick="mostrarPanel('historial', event)">Historial</a></li>
+    </ul>
+    <button id="btnLogout">Cerrar sesión</button>
+  </nav>
+
+  <!-- Paneles principales -->
+  <main id="contenido" class="oculto">
+
+    <!-- Dashboard -->
+    <section id="dashboard" class="panel principal activo">
+      <h2>Panel Principal</h2>
+      <div class="indicadores">
+        <div class="indicador">
+          <h3>Total Cultivos</h3>
+          <p id="totalCultivos">0</p>
+        </div>
+        <div class="indicador">
+          <h3>Próxima Cosecha</h3>
+          <p id="proximaCosecha">-</p>
+        </div>
+        <div class="indicador">
+          <h3>Consumo de Insumos (últimos 7 días)</h3>
+          <ul id="consumoInsumos"></ul>
+        </div>
+        <div class="indicador">
+          <h3>Tareas Próximas</h3>
+          <ul id="tareasProximas"></ul>
+        </div>
+        <div class="indicador" style="width: 100%;">
+          <h3>Productividad Semanal</h3>
+          <canvas id="graficoProductividad" width="400" height="200"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- Registro de Cultivos -->
+    <section id="cultivos" class="panel">
+      <h2>Registro de Cultivos</h2>
+      <form id="formCultivo">
+        <div>
+          <label for="nombreCultivo">Nombre del cultivo:</label>
+          <input type="text" id="nombreCultivo" name="nombreCultivo" required placeholder="Ej: Zanahoria #1" />
+        </div>
+        <div>
+          <label for="fechaSiembra">Fecha de siembra:</label>
+          <input type="date" id="fechaSiembra" name="fechaSiembra" required />
+        </div>
+        <div>
+          <label for="tipoPlanta">Tipo de planta:</label>
+          <input type="text" id="tipoPlanta" name="tipoPlanta" required placeholder="Zanahoria" />
+        </div>
+        <div>
+          <label for="tratamientos">Tratamientos aplicados:</label>
+          <textarea id="tratamientos" name="tratamientos" rows="3" placeholder="Ej: Fertilizante orgánico..."></textarea>
+        </div>
+        <div>
+          <label for="fechaCosecha">Fecha de cosecha (estimada):</label>
+          <input type="date" id="fechaCosecha" name="fechaCosecha" />
+        </div>
+        <button type="submit">Registrar cultivo</button>
+      </form>
+      <hr />
+      <div id="listaCultivos"></div>
+    </section>
+
+    <!-- Planificación -->
+    <section id="planificacion" class="panel">
+      <h2>Planificación de Actividades</h2>
+      <form id="formPlanificacion">
+        <div>
+          <label for="actividad">Actividad:</label>
+          <input type="text" id="actividad" name="actividad" required placeholder="Ej: Riego semanal" />
+        </div>
+        <div>
+          <label for="fechaActividad">Fecha:</label>
+          <input type="date" id="fechaActividad" name="fecha" required />
+        </div>
+        <input type="hidden" id="cultivoRelacionado" name="cultivo" value="zanahoria" />
+        <input type="hidden" id="correoDestino" name="para_email" value="destinatario@ejemplo.com" />
+        <p id="mensajeConfirmacion" style="color: green; display: none;">✅ Correo enviado exitosamente</p>
+        <button type="submit">Agregar actividad</button>
+      </form>
+      <hr />
+      <div id="listaActividades"></div>
+    </section>
+
+    <!-- Reportes -->
+    <section id="reportes" class="panel">
+      <h2>Reportes y Análisis</h2>
+      <form id="formReporteFiltro">
+        <div>
+          <label for="filtroTipo">Filtrar por tipo de cultivo:</label>
+          <input type="text" id="filtroTipo" name="filtroTipo" placeholder="Ejemplo: zanahoria" />
+        </div>
+        <button type="submit">Aplicar filtro</button>
+      </form>
+
+      <div>
+        <h3>Conteo de cultivos por tipo:</h3>
+        <ul id="reporteCultivos"></ul>
+      </div>
+      <div>
+        <h3>Actividades planificadas:</h3>
+        <ul id="reporteActividades"></ul>
+      </div>
+      <div>
+        <h3>Gráfico de distribución:</h3>
+        <canvas id="graficoCultivos" width="600" height="300"></canvas>
+        <p id="mensajeSinDatos" style="color: #999; text-align: center; margin-top: 15px; display: none;">
+          No hay datos suficientes para generar un gráfico.
+        </p>
+      </div>
+      <div style="margin-top: 20px;">
+        <button id="btnExportarPDF" disabled>📝 Exportar gráfico a PDF</button>
+        <button id="btnExportarCSV">Exportar CSV</button>
+      </div>
+    </section>
+
+    <!-- Insumos -->
+    <section id="insumos" class="panel">
+      <h2>Gestión de Insumos</h2>
+      <form id="formInsumo">
+        <div>
+          <label for="nombreInsumo">Nombre del insumo:</label>
+          <input type="text" id="nombreInsumo" name="nombreInsumo" required />
+        </div>
+        <div>
+          <label for="tipoInsumo">Tipo:</label>
+          <select id="tipoInsumo" name="tipoInsumo" required>
+            <option value="">Seleccione</option>
+            <option value="Agua">Agua</option>
+            <option value="Fertilizante">Fertilizante</option>
+            <option value="Pesticida">Pesticida</option>
+            <option value="Otro">Otro</option>
+          </select>
+        </div>
+        <div>
+          <label for="cantidadInsumo">Cantidad (kg/l):</label>
+          <input type="number" id="cantidadInsumo" name="cantidadInsumo" step="0.01" required />
+        </div>
+        <div>
+          <label for="fechaInsumo">Fecha de uso:</label>
+          <input type="date" id="fechaInsumo" name="fechaInsumo" required />
+        </div>
+        <button type="submit">Registrar insumo</button>
+      </form>
+
+      <h3>Lista de Insumos Registrados</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Tipo</th>
+            <th>Cantidad</th>
+            <th>Fecha</th>
+          </tr>
+        </thead>
+        <tbody id="tablaInsumos"></tbody>
+      </table>
+    </section>
+
+    <!-- Historial de acciones -->
+    <section id="historial" class="panel">
+      <h2>Historial de Actividades</h2>
+      <ul id="listaHistorial"></ul>
+    </section>
+  </main>
+
+  <!-- Scripts principales -->
+  <script type="module" src="main.js"></script>
+  <script type="module" src="insumos.js"></script>
+
+  <!-- Script para envío de correo con EmailJS -->
+  <script>
+    document.getElementById('formPlanificacion')?.addEventListener('submit', function (e) {
+      e.preventDefault();
+      emailjs.sendForm('service_ymu0gyo', 'template_f9hczbd', this)
+        .then(function () {
+          const mensaje = document.getElementById('mensajeConfirmacion');
+          mensaje.style.display = 'block';
+          mensaje.textContent = "✅ Correo enviado exitosamente";
+          setTimeout(() => {
+            mensaje.style.display = 'none';
+          }, 4000);
+        }, function (error) {
+          alert('❌ Error al enviar el correo: ' + JSON.stringify(error));
+        });
+    });
+  </script>
+</body>
+</html>
