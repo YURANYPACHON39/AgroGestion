@@ -73,14 +73,14 @@ La interfaz de AgroGestión ha sido diseñada para ser intuitiva, moderna y acce
 
 ## Tecnología
 
-| Componente         | Descripción                                |
+| Elementos         | Descripción                                |
 |--------------------|--------------------------------------------|
 | Lenguaje           | JavaScript (JS), HTML, CSS                 |
 | Base de Datos      | Firebase Firestore                         |
 | Autenticación      | Firebase Authentication                    |
 | Editor de Código   | Visual Studio Code                         |
 | Servicio de Correo | EmailJS                                    |
-| Librerías Extras   | Chart.js (gráficos), jsPDF (exportación)   |
+| Librerías Extras   | Chart.js (gráficos), PDF (exportación)   |
 
 ## Flujo del Sistema
 
